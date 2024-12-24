@@ -1,8 +1,7 @@
 #!/bin/bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  #
 # for Semi-Manual upgrading your system.
-# NOTE: requires rsync 
-
+# NOTE: requires rsync
 
 # Set some colors for output messages
 OK="$(tput setaf 2)[OK]$(tput sgr0)"
@@ -13,7 +12,6 @@ CAT="$(tput setaf 6)[ACTION]$(tput sgr0)"
 ORANGE=$(tput setaf 166)
 YELLOW=$(tput setaf 3)
 RESET=$(tput sgr0)
-
 
 # Create Directory for Upgrade Logs
 if [ ! -d Upgrade-Logs ]; then
@@ -57,7 +55,7 @@ declare -A exclusions=(
 compare_directories() {
     local source_dir="$1"
     local target_dir="$2"
-    local exclusion="${exclusions[$source_dir]}"  # Get exclusions for the source directory
+    local exclusion="${exclusions[$source_dir]}" # Get exclusions for the source directory
 
     # Perform dry-run comparison using rsync with exclusions
     diff=$(rsync -avn --delete "$source_dir" "$target_dir" $exclusion)
@@ -106,45 +104,45 @@ if version_gt "$latest_version" "$stored_version"; then
     read -r answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         # Loop through directories for comparison
-		for source_folder in "${!directories[@]}"; do
-    	target_folder="${directories[$source_folder]}"
-    	echo "$YELLOW Comparing directories: $source_folder and $target_folder" $RESET    
-    	# Compare source and target folders
-    	comparison=$(compare_directories "$source_folder" "$target_folder")
-    	if [ -n "$comparison" ]; then
-        echo "$NOTE Here are difference of $source_folder and $target_folder:"
-        echo "$comparison"
-        
-        printf "\n%.0s" {1..2}
-        
-        # Prompt user for action
-        echo "$CAT Do you want to copy files and folders from $source_folder to $target_folder? (Y/N)"
-        read -r answer
+        for source_folder in "${!directories[@]}"; do
+            target_folder="${directories[$source_folder]}"
+            echo "$YELLOW Comparing directories: $source_folder and $target_folder" $RESET
+            # Compare source and target folders
+            comparison=$(compare_directories "$source_folder" "$target_folder")
+            if [ -n "$comparison" ]; then
+                echo "$NOTE Here are difference of $source_folder and $target_folder:"
+                echo "$comparison"
 
-        if [[ "$answer" =~ ^[Yy]$ ]]; then
-            # Creating backup of the target folder
-            create_backup "$target_folder"
-            
-            printf "\n%.0s" {1..2}
-            # Copy differences from source folder to target folder
-            rsync -av --delete ${exclusions[$source_folder]} "$source_folder" "$target_folder"
-            echo "$NOTE Differences of "$target_folder" copied successfully." 2>&1 | tee -a "$LOG"
-            printf "\n%.0s" {1..2}
-        else
-            	echo "$NOTE No changes were made for $target_folder" 2>&1 | tee -a "$LOG"
-        	fi
-    	else
-        	echo "$OK No differences found between $source_folder and $target_folder" 2>&1 | tee -a "$LOG"
-    	fi
-		done
-		printf "\n%.0s" {1..2}
+                printf "\n%.0s" {1..2}
+
+                # Prompt user for action
+                echo "$CAT Do you want to copy files and folders from $source_folder to $target_folder? (Y/N)"
+                read -r answer
+
+                if [[ "$answer" =~ ^[Yy]$ ]]; then
+                    # Creating backup of the target folder
+                    create_backup "$target_folder"
+
+                    printf "\n%.0s" {1..2}
+                    # Copy differences from source folder to target folder
+                    rsync -av --delete ${exclusions[$source_folder]} "$source_folder" "$target_folder"
+                    echo "$NOTE Differences of "$target_folder" copied successfully." 2>&1 | tee -a "$LOG"
+                    printf "\n%.0s" {1..2}
+                else
+                    echo "$NOTE No changes were made for $target_folder" 2>&1 | tee -a "$LOG"
+                fi
+            else
+                echo "$OK No differences found between $source_folder and $target_folder" 2>&1 | tee -a "$LOG"
+            fi
+        done
+        printf "\n%.0s" {1..2}
         echo "$NOTE Files or Folders updated successfully to version $latest_version" 2>&1 | tee -a "$LOG"
 
-		# Set some files as executable
-		chmod +x ~/.config/hypr/scripts/* 2>&1 | tee -a "$LOG"
-		chmod +x ~/.config/hypr/UserScripts/* 2>&1 | tee -a "$LOG"
-		chmod +x ~/.config/hypr/initial-boot.sh 2>&1 | tee -a "$LOG"
-		
+        # Set some files as executable
+        chmod +x ~/.config/hypr/scripts/* 2>&1 | tee -a "$LOG"
+        chmod +x ~/.config/hypr/UserScripts/* 2>&1 | tee -a "$LOG"
+        chmod +x ~/.config/hypr/initial-boot.sh 2>&1 | tee -a "$LOG"
+
     else
         echo "$ORANGE Upgrade declined. No files or folders changed" 2>&1 | tee -a "$LOG"
     fi
@@ -153,7 +151,7 @@ else
 fi
 
 printf "\n%.0s" {1..3}
-echo "$(tput bold)$(tput setaf 3)ATTENTION!!!! VERY IMPORTANT NOTICE!!!! $(tput sgr0)" 
+echo "$(tput bold)$(tput setaf 3)ATTENTION!!!! VERY IMPORTANT NOTICE!!!! $(tput sgr0)"
 echo "$(tput bold)$(tput setaf 7)If you updated waybar folder, and you have your own waybar layout and styles $(tput sgr0)"
 echo "$(tput bold)$(tput setaf 7)Copy those files from the created backup ~/.config/waybar-b4-upgrade $(tput sgr0)"
 echo "$(tput bold)$(tput setaf 7)Make sure to set your waybar and style before logout or reboot $(tput sgr0)"
