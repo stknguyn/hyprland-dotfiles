@@ -270,7 +270,7 @@ echo "${OK} You have chosen $resolution resolution." 2>&1 | tee -a "$LOG"
 # Add your commands based on the resolution choice
 if [ "$resolution" == "< 1440p" ]; then
     cp -r config/rofi/resolution/1080p/* config/rofi/
-    sed -i 's/font_size 16.0/font_size 12.0/' config/kitty/kitty.conf
+    sed -i 's/font_size 16.0/font_size 10.0/' config/kitty/kitty.conf
 
     # hyprlock matters
     mv config/hypr/hyprlock.conf config/hypr/hyprlock-2k.conf
@@ -701,6 +701,6 @@ ln -sf "$waybar_style" "$HOME/.config/waybar/style.css" &&
 wallust run -s $wallpaper 2>&1 | tee -a "$LOG"
 
 printf "\n%.0s" {1..4}
-printf "${OK} GREAT! KooL's Hyprland-Dots is now Loaded & Ready !!!"
+printf "${OK} Stork Nguyen scripts is now Loaded & Ready !!!"
 printf "\n%.0s" {1..1}
-printf "${ORANGE}HOWEVER I HIGHLY SUGGEST to logout and re-login or better reboot to avoid any issues\n\n"
+printf "${ORANGE}[OPTIONAL] HIGHLY SUGGEST to logout and re-login or better reboot to avoid any issues\n\n"
