@@ -28,7 +28,7 @@ echo
 echo
 
 # List of files to create symlinks for
-files=(".vimrc" ".nvidia-setting-rc")
+files=(".vimrc" ".nvidia-setting-rc" ".bashrc" ".bash_logout" ".bash_profile")
 source_dir="./hyprland-dotfiles"
 destination_dir="$HOME"
 
@@ -59,6 +59,6 @@ for file in "${files[@]}"; do
         echo -e "${BLUE}[INFO]${NC} ${CYAN}$file${NC} has been successfully linked in ${CYAN}$destination_dir${NC}."
     fi
 done
-
+echo 
 echo -e "${GREEN}[DONE]${NC} Script complete!"
 
