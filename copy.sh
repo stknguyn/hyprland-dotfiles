@@ -513,13 +513,7 @@ FILES="
 "
 
 # Define the backup directory
-BACKUP_DIR="$HOME/dotfiles-backup"
-
-# Create the backup directory if it doesn't exist
-if [ ! -d "$BACKUP_DIR" ]; then
-    mkdir -p "$BACKUP_DIR"
-    echo "${OK} - Backup directory created at $BACKUP_DIR"
-fi
+BACKUP_DIR="$HOME"
 
 for FILE in $FILES; do
     SOURCE_FILE="$HOME/$FILE"
@@ -532,7 +526,7 @@ for FILE in $FILES; do
             echo "${ERROR} - Failed to copy $FILE."
         fi
     else
-        echo "${WARN} - $FILE does not exist, skipping."
+        echo "${WARN} - $FILE not found. Copy $FILE to the ~ directory"
     fi
 done
 
