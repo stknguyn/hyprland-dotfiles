@@ -50,7 +50,7 @@ elif ((resolution >= 720 && resolution < 1080)); then
     T_val=$(awk "BEGIN {printf \"%.0f\", $A_720 * 720 * $hypr_scale / $resolution}")
     B_val=$(awk "BEGIN {printf \"%.0f\", $B_720 * 720 * $hypr_scale / $resolution}")
     echo "Setting parameters for resolution >= 720p and < 1080p"
-    wlogout --protocol layer-shell -b 3 -T $T_val -B $B_val &
+    wlogout --protocol layer-shell -b 2 -T $T_val -B $B_val &
 else
     echo "Setting default parameters"
     wlogout &
