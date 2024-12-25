@@ -33,9 +33,9 @@
 
 "custom/browser": {
 	"format": " ",
-	"on-click": "firefox",
+	"on-click": "thorium-browser",
 	"tooltip": true,
-	"tooltip-format": "Launch Browser",
+	"tooltip-format": "Launch Thorium Browser",
 },
 
 "custom/settings": {

@@ -2,11 +2,6 @@
 
 # Clear the screen
 clear
-# Check if running as root. If root, script will exit
-if [[ $EUID -eq 0 ]]; then
-    echo "This script should not be executed as root! Exiting......."
-    exit 1
-fi
 # Define color codes
 BLUE='\033[1;34m'
 YELLOW='\033[1;33m'
@@ -27,8 +22,11 @@ echo -e "${BLUE}██║╚██╗████║   ████║   ██�
 echo -e "${BLUE}██║ ╚████╚██████╔╚██████╔╝  ██║  █████████║ ╚████║${NC}"
 echo -e "${BLUE}╚═╝  ╚═══╝╚═════╝ ╚═════╝   ╚═╝  ╚══════╚═╝  ╚═══╝${NC}"
 echo
-echo
-
+# Check if running as root. If root, script will exit
+if [[ $EUID -eq 0 ]]; then
+    echo "This script should not be executed as root! Exiting......."
+    exit 1
+fi
 # List of files to create symlinks for
 files=(".vimrc" ".nvidia-setting-rc" ".bashrc" ".bash_logout" ".bash_profile")
 source_dir="$HOME/hyprland-dotfiles"
@@ -49,9 +47,9 @@ for file in "${files[@]}"; do
             echo -e "${BLUE}[INFO]${NC} ${CYAN}$file${NC} is already linked in ${CYAN}$destination_dir${NC}."
             continue
         fi
-            
+
         echo -e "${YELLOW}[WARNING]${NC} File ${CYAN}$file${NC} already exists in directory ${CYAN}$destination_dir${NC}."
-        
+
         # Validate user input
         while true; do
             read -p "Do you want to replace $file? [y/n]: " response
@@ -72,6 +70,5 @@ for file in "${files[@]}"; do
         echo -e "${BLUE}[INFO]${NC} ${CYAN}$file${NC} has been successfully linked in ${CYAN}$destination_dir${NC}."
     fi
 done
-echo 
+echo
 echo -e "${GREEN}[DONE]${NC} Script complete!"
-

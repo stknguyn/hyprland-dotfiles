@@ -57,13 +57,6 @@ button span {
     background-image: image(url("./icons/logout-hover.png"));
 }
 
-/* #suspend {
-    background-image: image(url("./icons/sleep.png"));
-}
-#suspend:hover {
-    background-image: image(url("./icons/sleep-hover.png"));
-} */
-
 #shutdown {
     background-image: image(url("./icons/power.png"));
 }
@@ -78,9 +71,3 @@ button span {
     background-image: image(url("./icons/restart-hover.png"));
 }
 
-/* #hibernate {
-    background-image: image(url("./icons/hibernate.png"));
-} */
-#hibernate:hover {
-    background-image: image(url("./icons/hibernate-hover.png"));
-}
