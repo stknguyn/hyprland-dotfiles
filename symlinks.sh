@@ -2,7 +2,11 @@
 
 # Clear the screen
 clear
-
+# Check if running as root. If root, script will exit
+if [[ $EUID -eq 0 ]]; then
+    echo "This script should not be executed as root! Exiting......."
+    exit 1
+fi
 # Define color codes
 BLUE='\033[1;34m'
 YELLOW='\033[1;33m'
@@ -41,13 +45,13 @@ for file in "${files[@]}"; do
         
         # Validate user input
         while true; do
-            read -p "Do you want to replace $file? (y/n): " response
-            if [[ "$response" == "yes" || "$response" == "y" ]]; then
+            read -p "Do you want to replace $file? [y/n]: " response
+            if ["$response" == "y" ]; then
                 rm -f "$destination_file"
                 ln -s "$source_file" "$destination_file"
                 echo -e "${BLUE}[INFO]${NC} ${CYAN}$file${NC} has been successfully linked in ${CYAN}$destination_dir${NC}."
                 break
-            elif [[ "$response" == "no" || "$response" == "n" ]]; then
+            elif [ "$response" == "n" ]; then
                 echo -e "${BLUE}[INFO]${NC} Skipping ${CYAN}$file${NC}."
                 break
             else
