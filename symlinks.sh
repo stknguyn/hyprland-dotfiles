@@ -14,8 +14,6 @@ GREEN='\033[1;32m'
 CYAN='\033[1;36m'
 NC='\033[0m' # No Color
 
-# Print spaces and ASCII art
-echo
 echo
 echo -e "${BLUE}███████████████╗██████╗██████╗██╗  ██╗${NC}"
 echo -e "${BLUE}██╔════╚══██╔══██╔═══████╔══████║ ██╔╝${NC}"
@@ -33,20 +31,31 @@ echo
 
 # List of files to create symlinks for
 files=(".vimrc" ".nvidia-setting-rc" ".bashrc" ".bash_logout" ".bash_profile")
-source_dir="./hyprland-dotfiles"
+source_dir="$HOME/hyprland-dotfiles"
 destination_dir="$HOME"
 
 for file in "${files[@]}"; do
     source_file="$source_dir/$file"
     destination_file="$destination_dir/$file"
-
+    # Check if the source file exists
+    if [ ! -e "$source_file" ]; then
+        echo -e "${YELLOW}[WARNING]${NC} File ${CYAN}$file${NC} does not exist in directory ${CYAN}$source_dir${NC}. Skipping..."
+        continue
+    fi
+    # Check if the destination file already exist
     if [ -e "$destination_file" ]; then
+        # Check correct symlink
+        if [ -L "$destination_file" ] && [ "$(readlink "$destination_file")" == "$source_file" ]; then
+            echo -e "${BLUE}[INFO]${NC} ${CYAN}$file${NC} is already linked in ${CYAN}$destination_dir${NC}."
+            continue
+        fi
+            
         echo -e "${YELLOW}[WARNING]${NC} File ${CYAN}$file${NC} already exists in directory ${CYAN}$destination_dir${NC}."
         
         # Validate user input
         while true; do
             read -p "Do you want to replace $file? [y/n]: " response
-            if ["$response" == "y" ]; then
+            if [ "$response" == "y" ]; then
                 rm -f "$destination_file"
                 ln -s "$source_file" "$destination_file"
                 echo -e "${BLUE}[INFO]${NC} ${CYAN}$file${NC} has been successfully linked in ${CYAN}$destination_dir${NC}."
