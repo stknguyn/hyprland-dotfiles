@@ -539,6 +539,8 @@ FILES_TO_RESTORE=(
     "Monitors.conf"
     "Laptops.conf"
     "UserKeybinds.conf"
+    "Startup_Apps.conf"
+    "UserSettings.conf"
 )
 
 DIRPATH=~/.config/"$DIRH"
