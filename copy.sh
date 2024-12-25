@@ -34,10 +34,15 @@ ORANGE=$(tput setaf 166)
 YELLOW=$(tput setaf 3)
 BLUE=$(tput setaf 4)
 RESET=$(tput sgr0)
-
+CLEAR='\033[0m'
+# Check and create log directory
+if [ -e Copy-Logs ] && [ ! -d Copy-Logs ]; then
+    echo "Error: Copy-Logs exists but is not a directory." >&2
+    exit 1
+fi
 # Create Directory for Copy Logs
 if [ ! -d Copy-Logs ]; then
-    mkdir Copy-Logs
+    mkdir Copy-Logs  || { echo "Failed to create Copy-Logs directory. Check permissions." >&2; exit 1; }
 fi
 
 # Function to print colorful text
@@ -48,8 +53,12 @@ print_color() {
 # Set the name of the log file to include the current date and time
 LOG="Copy-Logs/install-$(date +%d-%H%M%S)_dotfiles.log"
 
-# update home folders
-xdg-user-dirs-update 2>&1 | tee -a "$LOG" || true
+# Check for xdg-user-dirs-update command
+if ! command -v xdg-user-dirs-update >/dev/null; then
+    echo "Error: xdg-user-dirs-update command not found." >&2
+else
+    xdg-user-dirs-update 2>&1 | tee -a "$LOG" || true
+fi
 
 # setting up for nvidia
 if lspci -k | grep -A 2 -E "(VGA|3D)" | grep -iq nvidia; then
@@ -501,59 +510,64 @@ done
 
 printf "\n%.0s" {1..1}
 
-printf "${INFO} - Copying dotfiles ${BLUE}third${RESET} part\n"
+# printf "${INFO} - Copying dotfiles ${BLUE}third${RESET} part\n"
 
-# Define the list of files to back up
-FILES="
-  .bash_logout
-  .bash_profile
-  .bashrc
-  .nvidia-settings-rc
-  .vimrc
-"
+# # Define the list of files to back up
+# FILES="
+#   .bash_logout
+#   .bash_profile
+#   .bashrc
+#   .nvidia-settings-rc
+#   .vimrc
+# "
 
-# Define the backup directory
-BACKUP_DIR="$HOME"
+# # Define the backup directory
+# BACKUP_DIR="$HOME"
 
-for FILE in $FILES; do
-    SOURCE_FILE="$HOME/$FILE"
-    if [ -f "$SOURCE_FILE" ]; then
-        echo "${NOTE} - Found $FILE, copying to backup directory."
-        cp "$SOURCE_FILE" "$BACKUP_DIR/" 2>&1 | tee -a "$LOG"
-        if [ $? -eq 0 ]; then
-            echo "${OK} - $FILE successfully copied to $BACKUP_DIR!"
-        else
-            echo "${ERROR} - Failed to copy $FILE."
-        fi
-    else
-        echo "${WARN} - $FILE not found. Copy $FILE to the ~ directory"
-    fi
-done
+# for FILE in $FILES; do
+#     SOURCE_FILE="$HOME/$FILE"
+#     if [ -f "$SOURCE_FILE" ]; then
+#         echo "${NOTE} - Found $FILE, copying to backup directory."
+#         cp "$SOURCE_FILE" "$BACKUP_DIR/" 2>&1 | tee -a "$LOG"
+#         if [ $? -eq 0 ]; then
+#             echo "${OK} - $FILE successfully copied to $BACKUP_DIR!"
+#         else
+#             echo "${ERROR} - Failed to copy $FILE."
+#         fi
+#     else
+#         echo "${WARN} - $FILE not found. Copy $FILE to the ~ directory"
+#     fi
+# done
 
-printf "\n"
+# printf "\n"
 
-
-# restoration of old configs
+# restoration of old configs and scripts
 DIRH="hypr"
-FILES_TO_RESTORE=(
+FILES_TO_RESTORE_CONFIGS=(
     "Monitors.conf"
     "Laptops.conf"
     "UserKeybinds.conf"
     "Startup_Apps.conf"
     "UserSettings.conf"
+    "ENVariables.conf"
+    "UserDecorAnimations.conf"
+    "UserScripts.conf"
+)
+FILES_TO_RESTORE_SCRIPTS=(
+    "Weather.py"
+    "Weather.sh"
 )
 
 DIRPATH=~/.config/"$DIRH"
 BACKUP_DIR=$(get_backup_dirname)
 
-# Check if the UserConfigs directory exists in ~/.config/hypr
+# Restore UserConfigs
 if [ -d "$DIRPATH/UserConfigs" ]; then
-    # Loop through files to check and offer restoration
-    for FILE_NAME in "${FILES_TO_RESTORE[@]}"; do
+    for FILE_NAME in "${FILES_TO_RESTORE_CONFIGS[@]}"; do
         BACKUP_FILE="$DIRPATH-backup-$BACKUP_DIR/UserConfigs/$FILE_NAME"
 
         if [ -f "$BACKUP_FILE" ]; then
-            printf "\n${INFO} Found ${YELLOW}$FILE_NAME${RESET} in hypr backup...\n"
+            printf "\n${INFO} Found ${YELLOW}$FILE_NAME${RESET} in UserConfigs backup...\n"
             read -p "${CAT} Do you want to restore ${ORANGE}$FILE_NAME${RESET} from backup? (y/N): " file_restore
             if [[ "$file_restore" == [Yy]* ]]; then
                 cp "$BACKUP_FILE" "$DIRPATH/UserConfigs/$FILE_NAME" && echo "${OK} - $FILE_NAME restored!" 2>&1 | tee -a "$LOG"
@@ -566,7 +580,27 @@ else
     echo "${ERROR} - UserConfigs directory does not exist in $DIRPATH. Skipping restoration."
 fi
 
+# Restore UserScripts
+if [ -d "$DIRPATH/UserScripts" ]; then
+    for SCRIPT_NAME in "${FILES_TO_RESTORE_SCRIPTS[@]}"; do
+        BACKUP_SCRIPT="$DIRPATH-backup-$BACKUP_DIR/UserScripts/$SCRIPT_NAME"
+
+        if [ -f "$BACKUP_SCRIPT" ]; then
+            printf "\n${INFO} Found ${YELLOW}$SCRIPT_NAME${RESET} in UserScripts backup...\n"
+            read -p "${CAT} Do you want to restore ${ORANGE}$SCRIPT_NAME${RESET} from backup? (y/N): " script_restore
+            if [[ "$script_restore" == [Yy]* ]]; then
+                cp "$BACKUP_SCRIPT" "$DIRPATH/UserScripts/$SCRIPT_NAME" && echo "${OK} - $SCRIPT_NAME restored!" 2>&1 | tee -a "$LOG"
+            else
+                echo "${NOTE} - Skipped restoring $SCRIPT_NAME."
+            fi
+        fi
+    done
+else
+    echo "${ERROR} - UserScripts directory does not exist in $DIRPATH. Skipping restoration."
+fi
+
 printf "\n%.0s" {1..2}
+
 
 # copying Wallpapers
 mkdir -p ~/Pictures/wallpapers

@@ -2,14 +2,19 @@
 
 # Clear the screen
 clear
+
+# Check if running as root. If root, script will exit
+if [[ $EUID -eq 0 ]]; then
+    echo "This script should not be executed as root! Exiting......."
+    exit 1
+fi
 # Define color codes
 BLUE='\033[1;34m'
 YELLOW='\033[1;33m'
 GREEN='\033[1;32m'
 CYAN='\033[1;36m'
 NC='\033[0m' # No Color
-
-echo
+printf "\n%.0s" {1..2}
 echo -e "${BLUE}███████████████╗██████╗██████╗██╗  ██╗${NC}"
 echo -e "${BLUE}██╔════╚══██╔══██╔═══████╔══████║ ██╔╝${NC}"
 echo -e "${BLUE}███████╗  ██║  ██║   ████████╔█████╔╝ ${NC}"
@@ -21,12 +26,8 @@ echo -e "${BLUE}██╔██╗ ████║  █████║   ██�
 echo -e "${BLUE}██║╚██╗████║   ████║   ██║ ╚██╔╝ ██╔══╝ ██║╚██╗██║${NC}"
 echo -e "${BLUE}██║ ╚████╚██████╔╚██████╔╝  ██║  █████████║ ╚████║${NC}"
 echo -e "${BLUE}╚═╝  ╚═══╝╚═════╝ ╚═════╝   ╚═╝  ╚══════╚═╝  ╚═══╝${NC}"
-echo
-# Check if running as root. If root, script will exit
-if [[ $EUID -eq 0 ]]; then
-    echo "This script should not be executed as root! Exiting......."
-    exit 1
-fi
+printf "\n%.0s" {1..2}
+
 # List of files to create symlinks for
 files=(".vimrc" ".nvidia-setting-rc" ".bashrc" ".bash_logout" ".bash_profile")
 source_dir="$HOME/hyprland-dotfiles"
