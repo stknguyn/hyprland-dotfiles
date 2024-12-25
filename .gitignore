@@ -1,4 +1,4 @@
-.log
+*.log
 Copy-Logs
 Upgrade-Logs
-.sh.swp
+*.swp
