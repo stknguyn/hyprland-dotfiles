@@ -4,7 +4,7 @@ set number
 set relativenumber
 "Highlight the current line
 set cursorline
-:highlight Cursorline cterm=bold ctermbg=16
+:highlight Cursorline cterm=bold ctermbg=gray
 "Highlight search parttern
 set hlsearch
 "Search sensitivity
@@ -18,6 +18,13 @@ set laststatus=2
 set mouse=a
 "Enable syntax
 syntax on
-
+"Auto indent
+set autoindent
+"Tab setting
+set expandtab
+set tabstop=4
+set shiftwidth=0
+set softtabstop=0
+set smarttab
 "KEYMAP
 inoremap jj <Esc>
