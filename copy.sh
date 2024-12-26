@@ -394,7 +394,8 @@ if [ ! -d "$HOME/.config" ]; then
     exit 1
 fi
 
-printf "${INFO} - copying dotfiles ${BLUE}first${RESET} part\n"
+printf "${INFO} - Copying dotfiles ${BLUE}first${RESET} part\n"
+
 # Config directories which will ask the user whether to replace or not
 DIRS="
   ags 
@@ -409,7 +410,7 @@ for DIR2 in $DIRS; do
 
     if [ -d "$DIRPATH" ]; then
         while true; do
-            read -p "${CAT} ${ORANGE}$DIR2${RESET} config found in ~/.config/ Do you want to replace ${ORANGE}$DIR2${RESET} config? (y/n): " DIR1_CHOICE
+            read -p "${CAT} ${ORANGE}$DIR2${RESET} config found in ~/.config/. Do you want to replace ${ORANGE}$DIR2${RESET} config? (y/n): " DIR1_CHOICE
             case "$DIR1_CHOICE" in
             [Yy]*)
                 BACKUP_DIR=$(get_backup_dirname)
@@ -458,13 +459,7 @@ printf "\n%.0s" {1..1}
 
 printf "${INFO} - Copying dotfiles ${BLUE}second${RESET} part\n"
 
-# Check if the config directory exists
-if [ ! -d "config" ]; then
-    echo "${ERROR} - The 'config' directory does not exist."
-    exit 1
-fi
-
-DIR="
+DIRS="
   btop
   cava
   hypr
@@ -476,35 +471,53 @@ DIR="
   wlogout
 "
 
-for DIR_NAME in $DIR; do
-    DIRPATH=~/.config/"$DIR_NAME"
+for DIR2 in $DIRS; do
+    DIRPATH=~/.config/"$DIR2"
 
-    # Backup the existing directory if it exists
     if [ -d "$DIRPATH" ]; then
-        echo -e "${NOTE} - Config for ${ORANGE}$DIR_NAME${RESET} found, attempting to back up."
-        BACKUP_DIR=$(get_backup_dirname)
+        while true; do
+            read -p "${CAT} ${ORANGE}$DIR2${RESET} config found in ~/.config/. Do you want to replace ${ORANGE}$DIR2${RESET} config? (y/n): " DIR1_CHOICE
+            case "$DIR1_CHOICE" in
+            [Yy]*)
+                BACKUP_DIR=$(get_backup_dirname)
+                echo -e "${NOTE} - Config for ${YELLOW}$DIR2${RESET} found, attempting to back up."
 
-        # Backup the existing directory
-        mv "$DIRPATH" "$DIRPATH-backup-$BACKUP_DIR" 2>&1 | tee -a "$LOG"
-        if [ $? -eq 0 ]; then
-            echo -e "${NOTE} - Backed up $DIR_NAME to $DIRPATH-backup-$BACKUP_DIR."
-        else
-            echo "${ERROR} - Failed to back up $DIR_NAME."
-            exit 1
-        fi
-    fi
+                mv "$DIRPATH" "$DIRPATH-backup-$BACKUP_DIR" 2>&1 | tee -a "$LOG"
+                if [ $? -eq 0 ]; then
+                    echo -e "${NOTE} - Backed up $DIR2 to $DIRPATH-backup-$BACKUP_DIR." 2>&1 | tee -a "$LOG"
 
-    # Copy the new config
-    if [ -d "config/$DIR_NAME" ]; then
-        cp -r "config/$DIR_NAME/" ~/.config/"$DIR_NAME" 2>&1 | tee -a "$LOG"
-        if [ $? -eq 0 ]; then
-            echo "${OK} - Copy of config for ${YELLOW}$DIR_NAME${RESET} completed!"
-        else
-            echo "${ERROR} - Failed to copy $DIR_NAME."
-            exit 1
-        fi
+                    cp -r config/"$DIR2" ~/.config/"$DIR2"
+                    if [ $? -eq 0 ]; then
+                        echo -e "${OK} - Replaced $DIR2 with new configuration." 2>&1 | tee -a "$LOG"
+                    else
+                        echo "${ERROR} - Failed to copy $DIR2." 2>&1 | tee -a "$LOG"
+                        exit 1
+                    fi
+                else
+                    echo "${ERROR} - Failed to back up $DIR2." 2>&1 | tee -a "$LOG"
+                    exit 1
+                fi
+                break
+                ;;
+            [Nn]*)
+                # Skip the directory
+                echo -e "${NOTE} - Skipping ${ORANGE}$DIR2${RESET} " 2>&1 | tee -a "$LOG"
+                break
+                ;;
+            *)
+                echo -e "${WARN} - Invalid choice. Please enter Y or N."
+                ;;
+            esac
+        done
     else
-        echo "${ERROR} - Directory config/$DIR_NAME does not exist to copy."
+        # Copy new config if directory does not exist
+        cp -r config/"$DIR2" ~/.config/"$DIR2" 2>&1 | tee -a "$LOG"
+        if [ $? -eq 0 ]; then
+            echo "${OK} - Copy completed for ${YELLOW}$DIR2${RESET}" 2>&1 | tee -a "$LOG"
+        else
+            echo "${ERROR} - Failed to copy ${YELLOW}$DIR2${RESET}" 2>&1 | tee -a "$LOG"
+            exit 1
+        fi
     fi
 done
 
@@ -512,7 +525,6 @@ printf "\n%.0s" {1..1}
 
 # printf "${INFO} - Copying dotfiles ${BLUE}third${RESET} part\n"
 
-# # Define the list of files to back up
 # FILES="
 #   .bash_logout
 #   .bash_profile
@@ -521,7 +533,6 @@ printf "\n%.0s" {1..1}
 #   .vimrc
 # "
 
-# # Define the backup directory
 # BACKUP_DIR="$HOME"
 
 # for FILE in $FILES; do
@@ -533,13 +544,15 @@ printf "\n%.0s" {1..1}
 #             echo "${OK} - $FILE successfully copied to $BACKUP_DIR!"
 #         else
 #             echo "${ERROR} - Failed to copy $FILE."
+#             exit 1
 #         fi
 #     else
-#         echo "${WARN} - $FILE not found. Copy $FILE to the ~ directory"
+#         echo "${WARN} - $FILE not found. Copy $FILE to the ~ directory."
 #     fi
 # done
 
-# printf "\n"
+# printf "\n%.0s" {1..1}
+
 
 # restoration of old configs and scripts
 DIRH="hypr"
@@ -557,7 +570,9 @@ FILES_TO_RESTORE_SCRIPTS=(
     "Weather.py"
     "Weather.sh"
 )
-
+FILES_TO_RESTORE_scripts=(
+    "Wlogout.sh"
+)
 DIRPATH=~/.config/"$DIRH"
 BACKUP_DIR=$(get_backup_dirname)
 
@@ -597,6 +612,26 @@ if [ -d "$DIRPATH/UserScripts" ]; then
     done
 else
     echo "${ERROR} - UserScripts directory does not exist in $DIRPATH. Skipping restoration."
+fi
+
+printf "\n%.0s" {1..2}
+# Restore scripts
+if [ -d "$DIRPATH/scripts" ]; then
+    for SCRIPT_NAME in "${FILES_TO_RESTORE_scripts[@]}"; do
+        BACKUP_SCRIPT="$DIRPATH-backup-$BACKUP_DIR/scripts/$SCRIPT_NAME"
+
+        if [ -f "$BACKUP_SCRIPT" ]; then
+            printf "\n${INFO} Found ${YELLOW}$SCRIPT_NAME${RESET} in scripts backup...\n"
+            read -p "${CAT} Do you want to restore ${ORANGE}$SCRIPT_NAME${RESET} from backup? (y/N): " script_restore
+            if [[ "$script_restore" == [Yy]* ]]; then
+                cp "$BACKUP_SCRIPT" "$DIRPATH/scripts/$SCRIPT_NAME" && echo "${OK} - $SCRIPT_NAME restored!" 2>&1 | tee -a "$LOG"
+            else
+                echo "${NOTE} - Skipped restoring $SCRIPT_NAME."
+            fi
+        fi
+    done
+else
+    echo "${ERROR} - scripts directory does not exist in $DIRPATH. Skipping restoration."
 fi
 
 printf "\n%.0s" {1..2}
